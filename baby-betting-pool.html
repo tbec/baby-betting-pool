@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Baby Betting Pool — Brittney & Christie</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f4f0;
+      --bg-tertiary: #efede8;
+      --text-primary: #1a1a18;
+      --text-secondary: #6b6a65;
+      --border-light: rgba(0,0,0,0.12);
+      --border-med: rgba(0,0,0,0.2);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --pink-bg: #FBEAF0; --pink-text: #993556;
+      --blue-bg: #E6F1FB; --blue-text: #185FA5;
+      --amber-bg: #FAEEDA; --amber-text: #854F0B;
+      --accent: #378ADD;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #1e1e1c;
+        --bg-secondary: #2a2a27;
+        --bg-tertiary: #242421;
+        --text-primary: #f0ede6;
+        --text-secondary: #9a9890;
+        --border-light: rgba(255,255,255,0.1);
+        --border-med: rgba(255,255,255,0.18);
+        --pink-bg: #4B1528; --pink-text: #F4C0D1;
+        --blue-bg: #042C53; --blue-text: #B5D4F4;
+        --amber-bg: #412402; --amber-text: #FAC775;
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+    .app { max-width: 640px; margin: 0 auto; }
+    .hero { text-align: center; margin-bottom: 2rem; }
+    .hero h1 { font-size: 28px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+    .hero p { font-size: 15px; color: var(--text-secondary); }
+    .due-badge {
+      display: inline-block;
+      background: var(--bg-secondary);
+      border: 0.5px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 4px 14px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 10px;
+    }
+    .card {
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; flex-shrink: 0;
+    }
+    .av-pink { background: var(--pink-bg); color: var(--pink-text); }
+    .av-blue { background: var(--blue-bg); color: var(--blue-text); }
+    .av-amber { background: var(--amber-bg); color: var(--amber-text); }
+    .card-title { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+    .card-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .field-row.single { grid-template-columns: 1fr; }
+    @media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 12px; color: var(--text-secondary); letter-spacing: 0.04em; text-transform: uppercase; }
+    .field input, .field select {
+      height: 38px;
+      border: 0.5px solid var(--border-med);
+      border-radius: var(--radius-md);
+      padding: 0 10px;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      width: 100%;
+      appearance: auto;
+    }
+    .field input:focus, .field select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(55,138,221,0.15);
+    }
+    .hours-row { display: flex; align-items: center; gap: 10px; }
+    .hours-row input { width: 90px !important; text-align: center; }
+    .hours-label { font-size: 14px; color: var(--text-secondary); }
+    .pool-c-note { font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+    .submit-btn {
+      width: 100%; height: 46px;
+      border-radius: var(--radius-lg);
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-size: 15px; font-weight: 500;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .submit-btn:hover { opacity: 0.88; }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .error-msg { font-size: 13px; color: #A32D2D; margin-bottom: 8px; min-height: 18px; }
+    .success { text-align: center; padding: 3rem 1rem; }
+    .success-icon { font-size: 48px; margin-bottom: 16px; }
+    .success h2 { font-size: 24px; font-weight: 500; margin-bottom: 8px; }
+    .success p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; }
+    .reset-btn {
+      margin-top: 1.5rem;
+      background: none;
+      border: 0.5px solid var(--border-med);
+      border-radius: var(--radius-md);
+      padding: 8px 20px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+    .admin-toggle { text-align: center; margin-top: 2rem; }
+    .admin-toggle button {
+      background: none; border: none;
+      font-size: 12px; color: var(--text-secondary);
+      cursor: pointer; text-decoration: underline;
+    }
+    .admin-panel {
+      margin-top: 1rem;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+    }
+    .admin-panel h3 { font-size: 15px; font-weight: 500; margin-bottom: 1rem; }
+    .admin-pass-row { display: flex; gap: 8px; margin-bottom: 0.5rem; }
+    .admin-pass-row input { flex: 1; height: 36px; border: 0.5px solid var(--border-med); border-radius: var(--radius-md); padding: 0 10px; font-size: 14px; color: var(--text-primary); background: var(--bg-primary); }
+    .admin-pass-row button { padding: 0 16px; height: 36px; border-radius: var(--radius-md); border: 0.5px solid var(--border-med); background: var(--bg-primary); color: var(--text-primary); cursor: pointer; font-size: 13px; }
+    .entry-card {
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-bottom: 8px;
+    }
+    .entry-name { font-weight: 500; font-size: 14px; color: var(--text-primary); margin-bottom: 5px; }
+    .entry-contact { font-weight: 400; font-size: 12px; color: var(--text-secondary); margin-left: 6px; }
+    .entry-detail { font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
+    .pool-label {
+      display: inline-block; border-radius: 4px;
+      padding: 1px 6px; font-size: 11px; font-weight: 500;
+      margin-right: 4px;
+    }
+    .lp { background: var(--pink-bg); color: var(--pink-text); }
+    .lc { background: var(--blue-bg); color: var(--blue-text); }
+    .la { background: var(--amber-bg); color: var(--amber-text); }
+    .entry-count { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
+    .no-entries { font-size: 13px; color: var(--text-secondary); text-align: center; padding: 1rem 0; }
+    .section-label {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="hero">
+    <h1>Baby betting pool</h1>
+    <p>Brittney & Christie share the same due date — make your picks!</p>
+    <span class="due-badge">Due date: May 5, 2026</span>
+  </div>
+
+  <div id="form-view">
+    <div class="card">
+      <div class="section-label">Your info</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" id="bettor-name" placeholder="First & last name" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label>Phone or email</label>
+          <input type="text" id="bettor-contact" placeholder="So we can reach you" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="avatar av-pink">B</div>
+        <div>
+          <div class="card-title">Pool A — Brittney's baby</div>
+          <div class="card-sub">Guess the birth date & time. Closest wins.</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="b-date" />
+        </div>
+        <div class="field">
+          <label>Time</label>
+          <input type="time" id="b-time" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="avatar av-blue">C</div>
+        <div>
+          <div class="card-title">Pool B — Christie's baby</div>
+          <div class="card-sub">Guess the birth date & time. Closest wins.</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="c-date" />
+        </div>
+        <div class="field">
+          <label>Time</label>
+          <input type="time" id="c-time" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="avatar av-amber">C</div>
+        <div>
+          <div class="card-title">Pool C — Who delivers first?</div>
+          <div class="card-sub">Standalone bet — no date/time guess needed.</div>
+        </div>
+      </div>
+      <div class="field-row single" style="margin-bottom:12px;">
+        <div class="field">
+          <label>Who goes first?</label>
+          <select id="pc-who">
+            <option value="">— pick one —</option>
+            <option value="Brittney">Brittney</option>
+            <option value="Christie">Christie</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>By how many hours?</label>
+        <div class="hours-row">
+          <input type="number" id="pc-hours" min="0" max="999" step="1" placeholder="e.g. 6" />
+          <span class="hours-label">hours before the other</span>
+        </div>
+      </div>
+      <p class="pool-c-note">Closest guess on margin wins this pool, independent of pools A & B.</p>
+    </div>
+
+    <div id="form-error" class="error-msg"></div>
+    <button class="submit-btn" id="submit-btn" onclick="submitEntry()">Submit my picks</button>
+  </div>
+
+  <div class="success" id="success-view" style="display:none;">
+    <div class="success-icon">🎉</div>
+    <h2>You're in!</h2>
+    <p>Good luck — may your guesses be eerily accurate.<br>We'll reach out when the results are in.</p>
+    <button class="reset-btn" onclick="resetForm()">Submit another entry</button>
+  </div>
+
+  <div class="admin-toggle">
+    <button onclick="toggleAdmin()">Admin view</button>
+  </div>
+
+  <div class="admin-panel" id="admin-panel" style="display:none;">
+    <h3>Entries</h3>
+    <div id="admin-auth">
+      <div class="admin-pass-row">
+        <input type="password" id="admin-pass" placeholder="Admin password" onkeydown="if(event.key==='Enter')checkAdmin()" />
+        <button onclick="checkAdmin()">View</button>
+      </div>
+      <div id="admin-err" class="error-msg"></div>
+    </div>
+    <div id="admin-entries" style="display:none;"></div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PASSWORD = 'babypool2026';
+const STORAGE_KEY = 'baby_pool_entries_v1';
+
+function fmtDateTime(date, time) {
+  if (!date) return '—';
+  const d = new Date(date + 'T' + (time || '00:00'));
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    + (time ? ' at ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '');
+}
+
+function loadEntries() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveEntries(entries) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+function submitEntry() {
+  const name = document.getElementById('bettor-name').value.trim();
+  const contact = document.getElementById('bettor-contact').value.trim();
+  const bDate = document.getElementById('b-date').value;
+  const bTime = document.getElementById('b-time').value;
+  const cDate = document.getElementById('c-date').value;
+  const cTime = document.getElementById('c-time').value;
+  const pcWho = document.getElementById('pc-who').value;
+  const pcHours = document.getElementById('pc-hours').value;
+  const errEl = document.getElementById('form-error');
+  errEl.textContent = '';
+
+  if (!name) { errEl.textContent = 'Please enter your name.'; return; }
+  if (!contact) { errEl.textContent = 'Please enter your phone or email.'; return; }
+
+  const hasA = bDate && bTime;
+  const hasB = cDate && cTime;
+  const hasC = pcWho && pcHours !== '';
+  if (!hasA && !hasB && !hasC) { errEl.textContent = 'Please fill in at least one pool.'; return; }
+  if (pcWho && pcHours === '') { errEl.textContent = 'Please enter a number of hours for Pool C.'; return; }
+  if (!pcWho && pcHours !== '') { errEl.textContent = 'Please pick who goes first for Pool C.'; return; }
+
+  const entry = {
+    name, contact, ts: Date.now(),
+    poolA: hasA ? { date: bDate, time: bTime } : null,
+    poolB: hasB ? { date: cDate, time: cTime } : null,
+    poolC: hasC ? { who: pcWho, hours: parseFloat(pcHours) } : null
+  };
+
+  const entries = loadEntries();
+  entries.push(entry);
+  saveEntries(entries);
+
+  document.getElementById('form-view').style.display = 'none';
+  document.getElementById('success-view').style.display = 'block';
+}
+
+function resetForm() {
+  document.getElementById('form-view').style.display = 'block';
+  document.getElementById('success-view').style.display = 'none';
+  ['bettor-name','bettor-contact','b-date','b-time','c-date','c-time','pc-hours'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('pc-who').value = '';
+  document.getElementById('form-error').textContent = '';
+}
+
+function toggleAdmin() {
+  const p = document.getElementById('admin-panel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+function checkAdmin() {
+  const pass = document.getElementById('admin-pass').value;
+  const errEl = document.getElementById('admin-err');
+  if (pass !== ADMIN_PASSWORD) { errEl.textContent = 'Wrong password.'; return; }
+  errEl.textContent = '';
+  document.getElementById('admin-auth').style.display = 'none';
+  const container = document.getElementById('admin-entries');
+  container.style.display = 'block';
+  renderEntries(container);
+}
+
+function renderEntries(container) {
+  const entries = loadEntries();
+  if (!entries.length) { container.innerHTML = '<p class="no-entries">No entries yet.</p>'; return; }
+  let html = `<p class="entry-count">${entries.length} entr${entries.length === 1 ? 'y' : 'ies'}</p>`;
+  entries.slice().reverse().forEach(e => {
+    let details = '';
+    if (e.poolA) details += `<span class="pool-label lp">Pool A</span> Brittney: ${fmtDateTime(e.poolA.date, e.poolA.time)}<br>`;
+    if (e.poolB) details += `<span class="pool-label lc">Pool B</span> Christie: ${fmtDateTime(e.poolB.date, e.poolB.time)}<br>`;
+    if (e.poolC) details += `<span class="pool-label la">Pool C</span> ${e.poolC.who} first, by ${e.poolC.hours}h`;
+    html += `<div class="entry-card">
+      <div class="entry-name">${e.name} <span class="entry-contact">${e.contact}</span></div>
+      <div class="entry-detail">${details}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+</script>
+</body>
+</html>
