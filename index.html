@@ -419,9 +419,9 @@ async function submitEntry() {
     pool_b_time:   hasB  ? cTime             : null,
     pool_b_wt_lbs: hasBW ? parseInt(cWtLbs)  : null,
     pool_b_wt_oz:  hasBW ? parseInt(cWtOz)   : null,
-    pool_c_who:    poolCWho,
-    pool_c_hours:  poolCHours,
-    pool_c_derived: hasA && hasB
+    pool_c_who:     poolCWho,
+    pool_c_hours:   poolCHours,
+    pool_c_derived: !!(hasA && hasB)
   };
 
   try {
