@@ -210,14 +210,10 @@
   <div id="form-view">
     <div class="card">
       <div class="section-label">Your info</div>
-      <div class="field-row">
+      <div class="field-row single">
         <div class="field">
           <label>Your name</label>
           <input type="text" id="bettor-name" placeholder="First & last name" autocomplete="name" />
-        </div>
-        <div class="field">
-          <label>Phone or email</label>
-          <input type="text" id="bettor-contact" placeholder="So we can reach you" />
         </div>
       </div>
     </div>
@@ -268,7 +264,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="pool-c-card">
       <div class="card-header">
         <div class="avatar av-amber">C</div>
         <div>
@@ -331,6 +327,12 @@ const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // the long eyJ... key
 const TABLE_NAME       = 'entries';
 // ──────────────────────────────────────────────────────────────────────────────
 
+document.addEventListener('DOMContentLoaded', () => {
+  ['b-date','b-time','c-date','c-time'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updatePoolC);
+  });
+});
+
 const ADMIN_PASSWORD = 'babypool2026';
 const API = `${SUPABASE_URL}/rest/v1/${TABLE_NAME}`;
 const HEADERS = {
@@ -346,9 +348,21 @@ function fmtDateTime(date, time) {
     + (time ? ' at ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '');
 }
 
+function updatePoolC() {
+  const bDate = document.getElementById('b-date').value;
+  const bTime = document.getElementById('b-time').value;
+  const cDate = document.getElementById('c-date').value;
+  const cTime = document.getElementById('c-time').value;
+  const card  = document.getElementById('pool-c-card');
+  if (bDate && bTime && cDate && cTime) {
+    card.style.display = 'none';
+  } else {
+    card.style.display = 'block';
+  }
+}
+
 async function submitEntry() {
   const name    = document.getElementById('bettor-name').value.trim();
-  const contact = document.getElementById('bettor-contact').value.trim();
   const bDate   = document.getElementById('b-date').value;
   const bTime   = document.getElementById('b-time').value;
   const bWtLbs  = document.getElementById('b-wt-lbs').value;
@@ -357,22 +371,39 @@ async function submitEntry() {
   const cTime   = document.getElementById('c-time').value;
   const cWtLbs  = document.getElementById('c-wt-lbs').value;
   const cWtOz   = document.getElementById('c-wt-oz').value;
-  const pcWho   = document.getElementById('pc-who').value;
-  const pcHours = document.getElementById('pc-hours').value;
   const errEl   = document.getElementById('form-error');
   errEl.textContent = '';
 
   if (!name)    { errEl.textContent = 'Please enter your name.'; return; }
-  if (!contact) { errEl.textContent = 'Please enter your phone or email.'; return; }
 
   const hasA  = bDate && bTime;
   const hasAW = bWtLbs !== '' && bWtOz !== '';
   const hasB  = cDate && cTime;
   const hasBW = cWtLbs !== '' && cWtOz !== '';
-  const hasD  = pcWho && pcHours !== '';
-  if (!hasA && !hasAW && !hasB && !hasBW && !hasD) { errEl.textContent = 'Please fill in at least one pool.'; return; }
-  if (pcWho && pcHours === '') { errEl.textContent = 'Please enter a number of hours for Pool C.'; return; }
-  if (!pcWho && pcHours !== '') { errEl.textContent = 'Please pick who goes first for Pool C.'; return; }
+
+  // Derive Pool C from A & B if both have date+time, otherwise use manual inputs
+  let poolCWho = null, poolCHours = null;
+  if (hasA && hasB) {
+    const dtA = new Date(bDate + 'T' + bTime);
+    const dtB = new Date(cDate + 'T' + cTime);
+    const diffHours = Math.abs((dtA - dtB) / 36e5);
+    poolCWho   = dtA < dtB ? 'Brittney' : 'Christie';
+    poolCHours = parseFloat(diffHours.toFixed(2));
+  } else {
+    const pcWho   = document.getElementById('pc-who').value;
+    const pcHours = document.getElementById('pc-hours').value;
+    if (pcWho && pcHours !== '') {
+      poolCWho   = pcWho;
+      poolCHours = parseFloat(pcHours);
+    }
+    if (pcWho && pcHours === '') { errEl.textContent = 'Please enter a number of hours for Pool C.'; return; }
+    if (!pcWho && pcHours !== '') { errEl.textContent = 'Please pick who goes first for Pool C.'; return; }
+  }
+
+  const hasC = poolCWho !== null;
+  if (!hasA && !hasAW && !hasB && !hasBW && !hasC) {
+    errEl.textContent = 'Please fill in at least one pool.'; return;
+  }
 
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
@@ -380,17 +411,17 @@ async function submitEntry() {
 
   const payload = {
     name,
-    contact,
-    pool_a_date:   hasA  ? bDate                : null,
-    pool_a_time:   hasA  ? bTime                : null,
-    pool_a_wt_lbs: hasAW ? parseInt(bWtLbs)     : null,
-    pool_a_wt_oz:  hasAW ? parseInt(bWtOz)      : null,
-    pool_b_date:   hasB  ? cDate                : null,
-    pool_b_time:   hasB  ? cTime                : null,
-    pool_b_wt_lbs: hasBW ? parseInt(cWtLbs)     : null,
-    pool_b_wt_oz:  hasBW ? parseInt(cWtOz)      : null,
-    pool_c_who:    hasD  ? pcWho                : null,
-    pool_c_hours:  hasD  ? parseFloat(pcHours)  : null
+    pool_a_date:   hasA  ? bDate             : null,
+    pool_a_time:   hasA  ? bTime             : null,
+    pool_a_wt_lbs: hasAW ? parseInt(bWtLbs)  : null,
+    pool_a_wt_oz:  hasAW ? parseInt(bWtOz)   : null,
+    pool_b_date:   hasB  ? cDate             : null,
+    pool_b_time:   hasB  ? cTime             : null,
+    pool_b_wt_lbs: hasBW ? parseInt(cWtLbs)  : null,
+    pool_b_wt_oz:  hasBW ? parseInt(cWtOz)   : null,
+    pool_c_who:    poolCWho,
+    pool_c_hours:  poolCHours,
+    pool_c_derived: hasA && hasB
   };
 
   try {
@@ -421,6 +452,7 @@ function resetForm() {
     .forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('pc-who').value = '';
   document.getElementById('form-error').textContent = '';
+  updatePoolC();
 }
 
 function toggleAdmin() {
@@ -460,10 +492,13 @@ async function checkAdmin() {
         if (e.pool_b_wt_lbs != null) details += ` &nbsp;${e.pool_b_wt_lbs} lbs ${e.pool_b_wt_oz} oz`;
         details += '<br>';
       }
-      if (e.pool_c_who) details += `<span class="pool-label la">Pool C</span> ${e.pool_c_who} first, by ${e.pool_c_hours}h`;
+      if (e.pool_c_who) {
+        const tag = e.pool_c_derived ? ' <span style="font-size:11px;opacity:0.7">(auto)</span>' : '';
+        details += `<span class="pool-label la">Pool C</span> ${e.pool_c_who} first, by ${e.pool_c_hours}h${tag}`;
+      }
       if (!details)     details  = '<span style="color:var(--text-secondary)">No picks recorded</span>';
       html += `<div class="entry-card">
-        <div class="entry-name">${e.name}<span class="entry-contact">${e.contact}</span></div>
+        <div class="entry-name">${e.name}</div>
         <div class="entry-detail">${details}</div>
       </div>`;
     });
