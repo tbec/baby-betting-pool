@@ -1,4 +1,4 @@
-<!-- v1.0 :: flamingo-taco-77 -->
+<!-- v1.2 :: cactus-waffle-91 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -189,7 +189,21 @@
     .la { background: var(--amber-bg); color: var(--amber-text); }
     .entry-count { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
     .no-entries { font-size: 13px; color: var(--text-secondary); text-align: center; padding: 1rem 0; }
-    .spinner {
+    .pricing-banner {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .price-tile {
+      flex: 1;
+      background: var(--bg-primary);
+      border: 0.5px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      text-align: center;
+    }
+    .price-amount { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+    .price-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
       display: inline-block; width: 14px; height: 14px;
       border: 2px solid rgba(255,255,255,0.4);
       border-top-color: white;
@@ -206,9 +220,20 @@
     <h1>Baby betting pool</h1>
     <p>Brittney & Christie share the same due date — make your picks!</p>
     <span class="due-badge">Due date: May 5, 2026</span>
+    <p style="font-size:14px;color:var(--text-secondary);margin-top:1rem;line-height:1.6;">Guess the date, time, and weight for Brittney's and Christie's babies — or bet on who pops first and by how many hours. Pick one pool for $5 or go all in on all three for $15.</p>
   </div>
 
   <div id="form-view">
+    <div class="pricing-banner">
+      <div class="price-tile">
+        <div class="price-amount">$5</div>
+        <div class="price-desc">Any one pool</div>
+      </div>
+      <div class="price-tile">
+        <div class="price-amount">$15</div>
+        <div class="price-desc">All three pools</div>
+      </div>
+    </div>
     <div class="card">
       <div class="section-label">Your info</div>
       <div class="field-row single">
